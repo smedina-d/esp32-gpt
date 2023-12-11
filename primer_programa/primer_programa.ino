@@ -4,6 +4,8 @@
 #include <ArduinoJson.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include "Audio.h"
+
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 #include <Wire.h>
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -14,6 +16,13 @@ const char* ssid = "Archer24";
 const char* password = "laclavenolase";
 const char* chatgpt_token = "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";
 String res = "";
+
+#define I2S_DOUT      25
+#define I2S_BCLK      27
+#define I2S_LRC       26
+
+Audio audio;
+
 void setup() {
   Serial.begin(115200);
 
@@ -46,6 +55,10 @@ void setup() {
   display.setTextColor(WHITE);
   display.setCursor(0, 0);
   // Display static text
+
+  audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
+  audio.setVolume(100);
+  audio.connecttospeech("Hello From Sachin Soni", "en"); // Google TTS
   
 }
 
@@ -89,7 +102,6 @@ void loop()
 
       DynamicJsonDocument doc(1024);
 
-
       deserializeJson(doc, payload);
       String Answer = doc["choices"][0]["text"];
       Answer = Answer.substring(2);
@@ -118,4 +130,11 @@ void loop()
   delay(10000);
   display.clearDisplay();
 
+  audio.loop();
+
+}
+
+void audio_info(const char *info) {
+  Serial.print("audio_info: ");
+  Serial.println(info);
 }
